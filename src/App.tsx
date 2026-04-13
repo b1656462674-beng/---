@@ -67,11 +67,154 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
+import { Textarea } from '@/components/ui/textarea';
 
 import { MOCK_STUDENTS } from './data';
-import { Student, CourseStatus, FollowUpStatus } from './types';
+import { Student, CourseStatus, FollowUpStatus, FollowUpNote } from './types';
 
 // --- Components ---
+
+const FollowUpNoteDialog = ({ student, onAddNote }: { student: Student; onAddNote: (id: string, content: string) => void }) => {
+  const [note, setNote] = useState('');
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button className="text-blue-600 hover:text-blue-800 text-xs font-medium">跟单备注</button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[800px]">
+        <DialogHeader>
+          <DialogTitle>学员跟进</DialogTitle>
+        </DialogHeader>
+        <div className="py-6 space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-700">备注说明：</label>
+            <Textarea 
+              placeholder="请输入备注内容..." 
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              className="min-h-[120px] border-slate-200 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="space-y-4">
+            <div className="relative flex items-center justify-center">
+              <Separator className="absolute w-full" />
+              <span className="relative bg-white px-4 text-sm font-medium text-slate-500">备注历史</span>
+            </div>
+
+            <div className="border rounded-lg overflow-hidden border-slate-100">
+              <Table>
+                <TableHeader className="bg-slate-50/50">
+                  <TableRow className="hover:bg-transparent border-slate-100">
+                    <TableHead className="text-xs font-semibold text-slate-600">跟进环节</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-600">备注说明</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-600">操作时间</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-600">操作人</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {student.notes.length > 0 ? (
+                    student.notes.map((n) => (
+                      <TableRow key={n.id} className="border-slate-50">
+                        <TableCell className="text-xs text-slate-600">{n.stage}</TableCell>
+                        <TableCell className="text-xs text-slate-600">{n.content}</TableCell>
+                        <TableCell className="text-xs text-slate-600">{n.time}</TableCell>
+                        <TableCell className="text-xs text-slate-600">{n.operator}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-32 text-center">
+                        <div className="flex flex-col items-center justify-center text-slate-400 gap-2">
+                          <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center">
+                            <MessageSquare className="w-6 h-6 opacity-20" />
+                          </div>
+                          <span className="text-xs">暂无数据</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            
+            {student.notes.length > 0 && (
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <span className="text-xs text-slate-400">共 {student.notes.length} 条记录</span>
+                <div className="flex items-center border rounded overflow-hidden">
+                  <button className="px-2 py-1 text-xs border-r hover:bg-slate-50 disabled:opacity-50" disabled>&lt;</button>
+                  <button className="px-3 py-1 text-xs bg-blue-50 text-blue-600 font-medium">1</button>
+                  <button className="px-2 py-1 text-xs hover:bg-slate-50 disabled:opacity-50" disabled>&gt;</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        <DialogFooter className="border-t pt-4">
+          <Button variant="outline" onClick={() => setNote('')}>取消</Button>
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => {
+              onAddNote(student.id, note);
+              setNote('');
+            }}
+          >
+            确定
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const SMSReminderDialog = ({ student }: { student: Student }) => {
+  const [template, setTemplate] = useState('课前提醒');
+  const previewText = `同学你好，记得进行今天的课程学习喔。外教已经准备就绪啦！${student.lastClassTime.split(' ')[1].substring(0, 5)} https://hellotalk.cn/z/Gi9g12t4R，我们与你不见不散~`;
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button className="text-blue-600 hover:text-blue-800 text-xs font-medium">短信提醒</button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>发送短信</DialogTitle>
+        </DialogHeader>
+        <div className="py-8 space-y-8">
+          <div className="flex items-center gap-4">
+            <label className="text-sm font-medium text-slate-700 w-24 text-right">
+              <span className="text-red-500 mr-1">*</span>短信模板：
+            </label>
+            <Select value={template} onValueChange={setTemplate}>
+              <SelectTrigger className="flex-1 border-slate-200">
+                <SelectValue placeholder="选择模板" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="课前提醒">课前提醒</SelectItem>
+                <SelectItem value="完课提醒">完课提醒</SelectItem>
+                <SelectItem value="缺席提醒">缺席提醒</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex gap-4">
+            <label className="text-sm font-medium text-slate-700 w-24 text-right shrink-0">
+              短信预览：
+            </label>
+            <div className="flex-1 text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
+              {previewText}
+            </div>
+          </div>
+        </div>
+        <DialogFooter className="border-t pt-4">
+          <Button variant="outline">取消</Button>
+          <Button className="bg-blue-600 hover:bg-blue-700">确定</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const StatCard = ({ title, value, icon: Icon, colorClass, description }: { 
   title: string; 
@@ -153,6 +296,24 @@ export default function App() {
       description: '正在跳转客服系统...',
     });
     // In a real app: window.open('customer-service-url')
+  };
+
+  const handleAddNote = (id: string, content: string) => {
+    if (!content.trim()) return;
+    setStudents(prev => prev.map(s => {
+      if (s.id === id) {
+        const newNote: FollowUpNote = {
+          id: `n-${Date.now()}`,
+          stage: s.courseStatus,
+          content,
+          time: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+          operator: '王琪璐 Jasmine'
+        };
+        return { ...s, notes: [newNote, ...s.notes] };
+      }
+      return s;
+    }));
+    toast.success('备注已保存');
   };
 
   const handleAddTag = (id: string, newTag: string) => {
@@ -502,83 +663,15 @@ export default function App() {
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button 
-                              size="sm" 
-                              variant={student.followUpStatus === '待跟进' ? 'default' : 'outline'}
-                              className={`h-8 px-3 ${student.followUpStatus === '待跟进' ? 'bg-blue-600 hover:bg-blue-700' : 'border-slate-200 text-slate-600'}`}
+                          <div className="flex flex-col items-end gap-1">
+                            <FollowUpNoteDialog student={student} onAddNote={handleAddNote} />
+                            <SMSReminderDialog student={student} />
+                            <button 
+                              className="text-blue-600 hover:text-blue-800 text-xs font-medium"
                               onClick={() => handleFollowUp(student.id)}
                             >
-                              <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
                               去跟进
-                            </Button>
-                            
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button size="sm" variant="outline" className="h-8 px-3 border-slate-200 text-slate-600">
-                                  <Tag className="w-3.5 h-3.5 mr-1.5" />
-                                  打标签
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="sm:max-w-[425px]">
-                                <DialogHeader>
-                                  <DialogTitle>管理学员标签</DialogTitle>
-                                  <DialogDescription>
-                                    为学员 {student.nickname} 添加或删除跟进标签。
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="py-4 space-y-4">
-                                  <div className="flex flex-wrap gap-2">
-                                    {student.tags.map(tag => (
-                                      <Badge key={tag} className="bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-100 flex items-center gap-1 pr-1">
-                                        {tag}
-                                        <button onClick={() => handleRemoveTag(student.id, tag)} className="hover:text-blue-800">
-                                          <MoreHorizontal className="w-3 h-3 rotate-90" />
-                                        </button>
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <Input 
-                                      id="new-tag" 
-                                      placeholder="输入新标签..." 
-                                      className="flex-1"
-                                      onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                          handleAddTag(student.id, (e.target as HTMLInputElement).value);
-                                          (e.target as HTMLInputElement).value = '';
-                                        }
-                                      }}
-                                    />
-                                    <Button 
-                                      onClick={() => {
-                                        const input = document.getElementById('new-tag') as HTMLInputElement;
-                                        handleAddTag(student.id, input.value);
-                                        input.value = '';
-                                      }}
-                                    >
-                                      添加
-                                    </Button>
-                                  </div>
-                                  <div className="space-y-2">
-                                    <p className="text-xs font-medium text-slate-500">推荐标签</p>
-                                    <div className="flex flex-wrap gap-2">
-                                      {['待转化', '流失预警', '待续费', '优质学员', '沉默学员'].map(t => (
-                                        <Button 
-                                          key={t} 
-                                          variant="ghost" 
-                                          size="sm" 
-                                          className="h-7 text-[10px] bg-slate-50 hover:bg-slate-100"
-                                          onClick={() => handleAddTag(student.id, t)}
-                                        >
-                                          + {t}
-                                        </Button>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
+                            </button>
                           </div>
                         </TableCell>
                       </motion.tr>

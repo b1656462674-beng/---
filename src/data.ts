@@ -18,7 +18,8 @@ export const MOCK_STUDENTS: Student[] = [
     purchaseAmount: 99,
     tags: ['待转化'],
     organization: '机构A',
-    project: '项目1'
+    project: '项目1',
+    notes: []
   },
   {
     id: '2',
@@ -37,7 +38,16 @@ export const MOCK_STUDENTS: Student[] = [
     purchaseAmount: 5999,
     tags: ['优质学员'],
     organization: '机构B',
-    project: '项目2'
+    project: '项目2',
+    notes: [
+      {
+        id: 'n1',
+        stage: '正价课完课',
+        content: '学员表现优异，建议推荐进阶课程。',
+        time: '2026-04-13 11:58:59',
+        operator: '王琪璐 Jasmine'
+      }
+    ]
   },
   {
     id: '3',
@@ -56,7 +66,8 @@ export const MOCK_STUDENTS: Student[] = [
     purchaseAmount: 2999,
     tags: ['待转化'],
     organization: '机构A',
-    project: '项目1'
+    project: '项目1',
+    notes: []
   },
   {
     id: '4',
@@ -75,7 +86,16 @@ export const MOCK_STUDENTS: Student[] = [
     purchaseAmount: 4500,
     tags: ['流失预警'],
     organization: '机构C',
-    project: '项目3'
+    project: '项目3',
+    notes: [
+      {
+        id: 'n2',
+        stage: '连续缺席三节课',
+        content: '-',
+        time: '2026-04-13 17:51:40',
+        operator: '王琪璐 Jasmine'
+      }
+    ]
   },
   {
     id: '5',
@@ -94,7 +114,8 @@ export const MOCK_STUDENTS: Student[] = [
     purchaseAmount: 8800,
     tags: ['待续费'],
     organization: '机构A',
-    project: '项目2'
+    project: '项目2',
+    notes: []
   },
   {
     id: '6',
@@ -113,7 +134,8 @@ export const MOCK_STUDENTS: Student[] = [
     purchaseAmount: 9.9,
     tags: ['待约课'],
     organization: '机构B',
-    project: '项目1'
+    project: '项目1',
+    notes: []
   },
   {
     id: '7',
@@ -132,6 +154,7 @@ export const MOCK_STUDENTS: Student[] = [
     purchaseAmount: 1500,
     tags: ['沉默学员'],
     organization: '机构C',
-    project: '项目2'
+    project: '项目2',
+    notes: []
   }
 ];

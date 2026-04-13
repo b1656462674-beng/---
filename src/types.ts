@@ -8,6 +8,14 @@ export type CourseStatus =
 
 export type FollowUpStatus = '待跟进' | '已跟进';
 
+export interface FollowUpNote {
+  id: string;
+  stage: string;
+  content: string;
+  time: string;
+  operator: string;
+}
+
 export interface Student {
   id: string;
   nickname: string;
@@ -29,6 +37,7 @@ export interface Student {
   tags: string[];
   organization: string;
   project: string;
+  notes: FollowUpNote[];
 }
 
 export interface DashboardStats {
