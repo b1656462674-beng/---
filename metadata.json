@@ -1,0 +1,5 @@
+{
+  "name": "教务跟进看板",
+  "description": "一个专业的教务管理系统跟进看板，支持学员状态追踪、跟进统计、筛选过滤及标签管理。",
+  "requestFramePermissions": []
+}
